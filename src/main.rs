@@ -1,5 +1,6 @@
 use std::env;
 use std::collections::HashMap;
+use std::cmp::Ordering::Equal;
 
 macro_rules! solutions(
     { $($key:expr => $value:expr),+ } => {
@@ -55,12 +56,32 @@ fn fib() -> String {
     format!("{}", adults + kits)
 }
 
+fn gc() -> String {
+    include_str!("rosalind_gc.txt").trim().split(">")
+    .filter(|x|!x.is_empty())
+    .map(|x| {
+        let mut split = x.splitn(2, '\n');
+        let name = split.next().unwrap();
+        let dna = split.next().unwrap().replace('\n', "");
+        (name, dna)
+    })
+    .map(|x| {
+        let gc_count = x.1.matches('G').count() + x.1.matches('C').count();
+        let percentage = gc_count as f32 / x.1.len() as f32 * 100.0;
+        (x.0, percentage)
+    })
+    .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Equal))
+    .map(|x| format!("{}\n{}", x.0, x.1))
+    .unwrap()
+}
+
 fn main() {
     let solutions = solutions!{
         "dna" => &dna,
         "rna" => &rna,
         "revc"=> &revc,
-        "fib" => &fib
+        "fib" => &fib,
+        "gc"  => &gc
     };
 
     let args: Vec<String> = env::args().collect();
