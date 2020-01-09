@@ -36,6 +36,26 @@ fn revc() {
     println!("{}", result);
 }
 
+fn fib() {
+    println!("[fib] solution: ");
+
+    let vals : Vec<u64> = include_str!("rosalind_fib.txt")
+        .trim().split_whitespace()
+        .map(|x|x.parse().unwrap()).collect();
+    let (n, k) = (vals[0], vals[1]);
+
+    let mut kits : u64 = 1;
+    let mut adults : u64 = 0;
+
+    for _ in 0..n-1 {
+        let born = adults * k;
+        adults += kits;
+        kits = born;
+    }
+
+    println!("{}", adults + kits);
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -45,6 +65,7 @@ fn main() {
                 "dna" => dna(),
                 "rna" => rna(),
                 "revc" => revc(),
+                "fib" => fib(),
                 _ => ()
             };
         }
