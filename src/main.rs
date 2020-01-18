@@ -1,4 +1,6 @@
+use std::fs;
 use std::env;
+use std::path::Path;
 use std::collections::HashMap;
 use std::cmp::Ordering::Equal;
 
@@ -14,8 +16,16 @@ macro_rules! solutions(
      };
 );
 
+fn read_dataset(filename: &str) -> String {
+    let path = Path::new("data").join(filename);
+    let dataset = fs::read_to_string(&path)
+        .expect(format!("file not found: {}", path.to_str().unwrap()).as_str());
+
+    String::from(dataset.trim())
+}
+
 fn dna() -> String {
-    let dataset = include_str!("rosalind_dna.txt").trim();
+    let dataset = read_dataset("rosalind_dna.txt");
 
     format!("{} {} {} {}",
         dataset.matches('A').count(),
@@ -25,11 +35,11 @@ fn dna() -> String {
 }
 
 fn rna() -> String {
-    include_str!("rosalind_rna.txt").trim().replace("T", "U")
+    read_dataset("rosalind_rna.txt").replace("T", "U")
 }
 
 fn revc() -> String {
-    include_str!("rosalind_revc.txt").trim().chars().map(|c| match c {
+    read_dataset("rosalind_revc.txt").chars().map(|c| match c {
         'A' => 'T',
         'C' => 'G',
         'G' => 'C',
@@ -39,7 +49,7 @@ fn revc() -> String {
 }
 
 fn fib() -> String {
-    let vals : Vec<u64> = include_str!("rosalind_fib.txt")
+    let vals : Vec<u64> = read_dataset("rosalind_fib.txt")
         .trim().split_whitespace()
         .map(|x|x.parse().unwrap()).collect();
     let (n, k) = (vals[0], vals[1]);
@@ -57,7 +67,7 @@ fn fib() -> String {
 }
 
 fn gc() -> String {
-    include_str!("rosalind_gc.txt").trim().split(">")
+    read_dataset("rosalind_gc.txt").split(">")
     .filter(|x|!x.is_empty())
     .map(|x| {
         let mut split = x.splitn(2, '\n');
@@ -75,13 +85,36 @@ fn gc() -> String {
     .unwrap()
 }
 
+fn hamm() -> String {
+    let dataset = read_dataset("rosalind_hamm.txt");
+    let strs : Vec<&str> = dataset.split("\n").collect();
+
+    let mut n = 0;
+
+    let a = strs[0];
+    let b = strs[1];
+
+    for i in 0..strs[0].len() {
+        if let Some(c1) = a.chars().nth(i) {
+            if let Some(c2) = b.chars().nth(i) {
+                if c1 != c2 {
+                    n += 1;
+                }
+            }
+        }
+    }
+
+    n.to_string()
+}
+
 fn main() {
     let solutions = solutions!{
         "dna" => &dna,
         "rna" => &rna,
         "revc"=> &revc,
         "fib" => &fib,
-        "gc"  => &gc
+        "gc"  => &gc,
+        "hamm" => &hamm
     };
 
     let args: Vec<String> = env::args().collect();
